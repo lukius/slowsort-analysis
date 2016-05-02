@@ -24,6 +24,10 @@
 \newcommand{\Arrow}[1]{\ensuremath{\xrightarrow{\hspace*{#1 cm}}}}
 \newcommand{\floor}[1]{\ensuremath{\left\lfloor #1 \right\rfloor}}
 
+\title{Runtime analysis of the \SSort algorithm}
+\author{Lucio Santi\\
+\small{lsanti at dc.uba.ar}}
+\date{}
 
 \begin{document}
 \pagestyle{fancyplain}
@@ -32,6 +36,8 @@
 \chead{}
 \rhead{}
 \renewcommand{\headrulewidth}{0pt}
+
+\maketitle
 
 \section{Introduction}
 
@@ -85,7 +91,7 @@ We shall look now for asymptotic bounds for $T$. Let us consider first the follo
          &=& 2n \, U(n/2) + \Theta(n)
 \end{eqnarray*}
 
-Clearly, we have that $T(n) \leq U(n)$ for all $n$. In order to find an asymptotic solution for $U$, let's have a look at its recursion tree:
+Clearly, we have that $T(n) \leq U(n)$ for all $n$. In order to find an asymptotic solution for $U$, let's have a look at its recursion tree:\\
 
 \hspace{-0.5cm}
 \begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]
@@ -160,6 +166,7 @@ From this, it follows that
 This yields an asymptotic upper bound for $T$:
 
 \begin{equation}
+\label{eq:bigO}
     T(n) \in \BigO{n^{\log_2(n) + 1}}
 \end{equation}
 
@@ -177,7 +184,7 @@ Now, define the recurrence $L(n)$ as follows:
 
 Such an $L$ nearly satisfies every hypotheses required by the Akra-Bazzi theorem\cite{AB}. The only apparent exception is that the summation in the right-hand side goes up to a function of $n$, and the theorem states that this value should be a constant $k \in \Nat$. However, the proof outlined in \cite{AB} does not seem to rely strongly on this fact\footnote{If someone sufficiently qualified to confirm or disprove this assertion ever reads this, please let me know. Thanks in advance!}. In what follows, then, we will use the Akra-Bazzi theorem to obtain an asymptotic solution for $L$.\\
 
-Before proceeding, we observe that the perturbation functions $h_i(n)$ are properly bounded:
+Before proceeding, we observe that the index perturbation functions $h_i(n)$ are properly bounded:
 
 \begin{eqnarray}
 \label{eq:h}
@@ -188,7 +195,54 @@ Before proceeding, we observe that the perturbation functions $h_i(n)$ are prope
              &\in& \BigO{\frac{n}{\log^2{n}}}
 \end{eqnarray}
 
-(\ref{eq:h}) holds since $\frac{\sqrt{n}}{n / \log^2{n}}$ goes to $0$ as $n \rightarrow  \infty$.
+(\ref{eq:h}) holds since $\frac{\sqrt{n}}{n / \log^2{n}}$ goes to $0$ as $n \rightarrow  \infty$.\\
+
+Now, we need to find the value of $p$ to plug into the theorem and find a tight asymptotic bound for $L$:
+
+\begin{alignat*}{2}
+    &\quad \,\, \displaystyle \sum_{i = 0}^{\floor{\sqrt{n}} - 1}{a_i b_i^p} \quad &= & \quad 1 \\ 
+    &\Leftrightarrow \displaystyle \sum_{i = 0}^{\floor{\sqrt{n}} - 1}{2 \, \frac{1}{2^p}} \quad &=& \quad 1 \\
+    &\Leftrightarrow  \quad\quad\quad \frac{\floor{\sqrt{n}}}{2^{p-1}}\quad &=& \quad 1 \\
+    &\Leftrightarrow  \quad\quad \log_2\left(\floor{\sqrt{n}}\right) \quad &=& \quad p - 1 \\
+    &\Leftrightarrow  \quad\quad\quad\quad p \quad &=& \quad \log_2\left(\floor{\sqrt{n}}\right) + 1 \\
+\end{alignat*}
+
+With this in hand, we can calculate the following integral:
+
+\begin{eqnarray*}
+    \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx} &=& \int_{1}^{n}{\frac{x}{x^{\log_2\left(\floor{\sqrt{n}}\right) + 2}} \, dx} \\
+    &=& \int_{1}^{n}{\frac{dx}{x^{\log_2\left(\floor{\sqrt{n}}\right) + 1}}} \\
+    &=& \frac{-1}{\log_2\left(\floor{\sqrt{n}}\right) \, x^{\log_2\left(\floor{\sqrt{n}}\right)}} \bigg\rvert_{1}^{n} \\
+    &=& \frac{1}{\log_2\left(\floor{\sqrt{n}}\right)} - \frac{1}{\log_2\left(\floor{\sqrt{n}}\right) \, n^{\log_2\left(\floor{\sqrt{n}}\right)}}
+\end{eqnarray*}
+
+Finally,
+
+\begin{eqnarray*}
+    n^p \, \left(1 + \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx}\right) &=& n^{\log_2\left(\floor{\sqrt{n}}\right) + 1} \,
+                                                                         \left(1 + \frac{1}{\log_2\left(\floor{\sqrt{n}}\right)}
+                                                                         - \frac{1}{\log_2\left(\floor{\sqrt{n}}\right) \, n^{\log_2\left(\floor{\sqrt{n}}\right)}}
+                                                                         \right) \\
+    &\in& \Theta \left(n^{\log_2\left(\floor{\sqrt{n}}\right) + 1}\right) \\
+    &=& \Theta \left(n^{\frac{\log_2(n)}{2} + 1} \right)
+\end{eqnarray*}
+
+Therefore,
+
+$$L(n) \in \Theta \left(n^{\frac{\log_2(n)}{2} + 1} \right)$$
+
+which, since $L(n) \leq T(n)$ for all $n$, implies that
+
+\begin{equation}
+\label{eq:omega}
+    T(n) \in \Omega \left(n^{\frac{\log_2(n)}{2} + 1}\right)
+\end{equation}
+
+\vspace{1cm}
+
+Putting everything together, it follows from (\ref{eq:bigO}) and (\ref{eq:omega}) that, for sufficiently large $n$, there exist some constants $c_1, c_2 > 0$ such that
+
+$$c_1 \, n^{\frac{\log_2(n)}{2} + 1} \leq T(n) \leq c_2 \, n^{{\log_2(n) + 1}}$$
 
 \bibliography{slowsort} 
 \bibliographystyle{ieeetr}
