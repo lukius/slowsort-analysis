@@ -20,6 +20,7 @@
 
 \newcommand{\BigO}[1]{\ensuremath{\textrm{O}\left(#1\right)}}
 \newcommand{\Nat}{\ensuremath{\mathbb{N}}}
+\newcommand{\Real}{\ensuremath{\mathbb{R}}}
 \newcommand{\SSort}{\textsc{Slowsort }}
 \newcommand{\Arrow}[1]{\ensuremath{\xrightarrow{\hspace*{#1 cm}}}}
 \newcommand{\floor}[1]{\ensuremath{\left\lfloor #1 \right\rfloor}}
@@ -176,13 +177,13 @@ In order to find an asymptotic lower bound, let's first rewrite $T$ in the follo
     T(n) = \displaystyle \sum_{i = 0}^{n-1}{2T(n/2 - i/2)} + \Theta(n)
 \end{equation*} 
 
-Now, define the recurrence $L(n)$ as follows:
+Now, let us choose an arbitrary $\alpha \in \Real$ such that $0 < \alpha < 1$ and define the recurrence $L_{\alpha}(n)$ as follows:
 
 \begin{equation*}
-    L(n) = \displaystyle \sum_{i = 0}^{\floor{\sqrt{n}} - 1}{2L(n/2 - i/2)} + \Theta(n)
+    L_{\alpha}(n) = \displaystyle \sum_{i = 0}^{\floor{n^{\alpha}} - 1}{2L_{\alpha}(n/2 - i/2)} + \Theta(n)
 \end{equation*}
 
-Such an $L$ nearly satisfies every hypotheses required by the Akra-Bazzi theorem\cite{AB}. The only apparent exception is that the summation in the right-hand side goes up to a function of $n$, and the theorem states that this value should be a constant $k \in \Nat$. However, the proof outlined in \cite{AB} does not seem to rely strongly on this fact\footnote{If someone sufficiently qualified to confirm or disprove this assertion ever reads this, please let me know. Thanks in advance!}. In what follows, then, we will use the Akra-Bazzi theorem to obtain an asymptotic solution for $L$.\\
+Such an $L_{\alpha}$ nearly satisfies every hypotheses required by the Akra-Bazzi theorem\cite{AB}. The only apparent exception is that the summation in the right-hand side goes up to a function of $n$, and the theorem states that this value should be a constant $k \in \Nat$. However, the proof outlined in \cite{AB} does not seem to rely strongly on this fact\footnote{If someone sufficiently qualified to confirm or disprove this assertion ever reads this, please let me know. Thanks in advance!}. In what follows, then, we will use the Akra-Bazzi theorem to obtain an asymptotic solution for $L$.\\
 
 Before proceeding, we observe that the index perturbation functions $h_i(n)$ are properly bounded:
 
@@ -190,59 +191,65 @@ Before proceeding, we observe that the index perturbation functions $h_i(n)$ are
 \label{eq:h}
     |h_i(n)| &=& |-\frac{i}{2}| \nonumber \\
              &=& \frac{i}{2} \nonumber \\
-             &\leq& \frac{\floor{\sqrt{n}} - 1}{2} \nonumber \\
-             &\leq& \sqrt{n} \nonumber \\
+             &\leq& \frac{n^{\alpha} - 1}{2} \nonumber \\
+             &\leq& n^{\alpha} \nonumber \\
              &\in& \BigO{\frac{n}{\log^2{n}}}
 \end{eqnarray}
 
-(\ref{eq:h}) holds since $\frac{\sqrt{n}}{n / \log^2{n}}$ goes to $0$ as $n \rightarrow  \infty$.\\
+(\ref{eq:h}) holds since $\frac{n^{\alpha}}{n / \log^2{n}}$ goes to $0$ as $n \rightarrow  \infty$.\\
 
-Now, we need to find the value of $p$ to plug into the theorem and find a tight asymptotic bound for $L$:
+Now, we need to find the value of $p$ to plug into the theorem and find a tight asymptotic bound for $L_{\alpha}$:
 
 \begin{alignat*}{2}
-    &\quad \,\, \displaystyle \sum_{i = 0}^{\floor{\sqrt{n}} - 1}{a_i b_i^p} \quad &= & \quad 1 \\ 
-    &\Leftrightarrow \displaystyle \sum_{i = 0}^{\floor{\sqrt{n}} - 1}{2 \, \frac{1}{2^p}} \quad &=& \quad 1 \\
-    &\Leftrightarrow  \quad\quad\quad \frac{\floor{\sqrt{n}}}{2^{p-1}}\quad &=& \quad 1 \\
-    &\Leftrightarrow  \quad\quad \log_2\left(\floor{\sqrt{n}}\right) \quad &=& \quad p - 1 \\
-    &\Leftrightarrow  \quad\quad\quad\quad p \quad &=& \quad \log_2\left(\floor{\sqrt{n}}\right) + 1 \\
+    &\quad \,\, \displaystyle \sum_{i = 0}^{\floor{n^{\alpha}} - 1}{a_i b_i^p} \quad &= & \quad 1 \\ 
+    &\Leftrightarrow \displaystyle \sum_{i = 0}^{\floor{n^{\alpha}} - 1}{2 \, \frac{1}{2^p}} \quad &=& \quad 1 \\
+    &\Leftrightarrow  \quad\quad\quad \frac{\floor{n^{\alpha}}}{2^{p-1}}\quad &=& \quad 1 \\
+    &\Leftrightarrow  \quad\quad \log_2\left(\floor{n^{\alpha}}\right) \quad &=& \quad p - 1 \\
+    &\Leftrightarrow  \quad\quad\quad\quad p \quad &=& \quad \log_2\left(\floor{n^{\alpha}}\right) + 1 \\
 \end{alignat*}
 
 With this in hand, we can calculate the following integral:
 
 \begin{eqnarray*}
-    \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx} &=& \int_{1}^{n}{\frac{x}{x^{\log_2\left(\floor{\sqrt{n}}\right) + 2}} \, dx} \\
-    &=& \int_{1}^{n}{\frac{dx}{x^{\log_2\left(\floor{\sqrt{n}}\right) + 1}}} \\
-    &=& \frac{-1}{\log_2\left(\floor{\sqrt{n}}\right) \, x^{\log_2\left(\floor{\sqrt{n}}\right)}} \bigg\rvert_{1}^{n} \\
-    &=& \frac{1}{\log_2\left(\floor{\sqrt{n}}\right)} - \frac{1}{\log_2\left(\floor{\sqrt{n}}\right) \, n^{\log_2\left(\floor{\sqrt{n}}\right)}}
+    \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx} &=& \int_{1}^{n}{\frac{x}{x^{\log_2\left(\floor{n^{\alpha}}\right) + 2}} \, dx} \\
+    &=& \int_{1}^{n}{\frac{dx}{x^{\log_2\left(\floor{n^{\alpha}}\right) + 1}}} \\
+    &=& \frac{-1}{\log_2\left(\floor{n^{\alpha}}\right) \, x^{\log_2\left(\floor{n^{\alpha}}\right)}} \bigg\rvert_{1}^{n} \\
+    &=& \frac{1}{\log_2\left(\floor{n^{\alpha}}\right)} - \frac{1}{\log_2\left(\floor{n^{\alpha}}\right) \, n^{\log_2\left(\floor{n^{\alpha}}\right)}}
 \end{eqnarray*}
 
 Finally,
 
 \begin{eqnarray*}
-    n^p \, \left(1 + \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx}\right) &=& n^{\log_2\left(\floor{\sqrt{n}}\right) + 1} \,
-                                                                         \left(1 + \frac{1}{\log_2\left(\floor{\sqrt{n}}\right)}
-                                                                         - \frac{1}{\log_2\left(\floor{\sqrt{n}}\right) \, n^{\log_2\left(\floor{\sqrt{n}}\right)}}
+    n^p \, \left(1 + \int_{1}^{n}{\frac{g(x)}{x^{p+1}} \, dx}\right) &=& n^{\log_2\left(\floor{n^{\alpha}}\right) + 1} \,
+                                                                         \left(1 + \frac{1}{\log_2\left(\floor{n^{\alpha}}\right)}
+                                                                         - \frac{1}{\log_2\left(\floor{n^{\alpha}}\right) \, n^{\log_2\left(\floor{n^{\alpha}}\right)}}
                                                                          \right) \\
-    &\in& \Theta \left(n^{\log_2\left(\floor{\sqrt{n}}\right) + 1}\right) \\
-    &=& \Theta \left(n^{\frac{\log_2(n)}{2} + 1} \right)
+    &\in& \Theta \left(n^{\log_2\left(\floor{n^{\alpha}}\right) + 1}\right) \\
+    &=& \Theta \left(n^{\alpha \log_2(n) + 1} \right)
 \end{eqnarray*}
 
 Therefore,
 
-$$L(n) \in \Theta \left(n^{\frac{\log_2(n)}{2} + 1} \right)$$
+$$L_{\alpha}(n) \in \Theta \left(n^{\alpha \log_2(n) + 1}\right)$$
 
-which, since $L(n) \leq T(n)$ for all $n$, implies that
+which, since $L_{\alpha}(n) \leq T(n)$ for all $n$, implies that
 
 \begin{equation}
 \label{eq:omega}
-    T(n) \in \Omega \left(n^{\frac{\log_2(n)}{2} + 1}\right)
+    T(n) \in \Omega \left(n^{\alpha \log_2(n) + 1}\right)
 \end{equation}
 
 \vspace{1cm}
 
 Putting everything together, it follows from (\ref{eq:bigO}) and (\ref{eq:omega}) that, for sufficiently large $n$, there exist some constants $c_1, c_2 > 0$ such that
 
-$$c_1 \, n^{\frac{\log_2(n)}{2} + 1} \leq T(n) \leq c_2 \, n^{{\log_2(n) + 1}}$$
+$$c_1 \, n^{\alpha \log_2(n) + 1} \leq T(n) \leq c_2 \, n^{{\log_2(n) + 1}}$$
+
+for any $\alpha \in (0, 1)$.
+
+\subsection{Remarks about $\alpha$}
+
+The lower bound we explored above is only valid when $0 < \alpha < 1$. We might be tempted to choose $\alpha = 1$ in order to obtain a tight asymptotic bound for $T$, but unfortunately doing so would violate the index perturbation hypothesis of the Akra-Bazzi theorem. Indeed, in such cases, $h_i(n) \leq \frac{n-1}{2}$, and thus some of these functions will not be bounded the way the theorem expects.
 
 \bibliography{slowsort} 
 \bibliographystyle{ieeetr}
